@@ -10,7 +10,7 @@
 
                 <ion-col size="2" id="shuffleContainer">
                     <!--                        <ion-icon name="repeat" size="large"></ion-icon>-->
-                    <ion-icon name="shuffle" size="large"></ion-icon>
+                    <ion-icon name="shuffle" size="large" ref="iconConvert" @click="revertConverter"></ion-icon>
                 </ion-col>
 
                 <ion-col size="5">
@@ -42,11 +42,27 @@
         methods: {
             selectChange (e) {
                 this.$bus.$emit('selectChange', e)
+            },
+            revertConverter () {
+                console.log(this.$refs.iconConvert)
+                if (this.$refs.iconConvert.style.transform === 'rotate(180deg)') {
+                    this.$refs.iconConvert.style.transform = 'rotate(0deg)'
+                } else {
+                    this.$refs.iconConvert.style.transform = 'rotate(180deg)'
+                }
             }
         },
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+    #shuffleContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        ion-icon {
+            transition: .2s linear;
+        }
+    }
 </style>

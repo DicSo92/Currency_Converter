@@ -109,13 +109,6 @@
 </script>
 
 <style lang="scss">
-    #shuffleContainer {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
     .error {
         color: red;
     }
