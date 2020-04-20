@@ -16,35 +16,10 @@
             </ion-searchbar>
             <div class="error" v-if="!$v.search.required">Field is required</div>
 
-            <ion-grid v-if="!loadingRates">
-                <ion-row>
-                    <ion-col size="5" class="flex-center">
-                        <ion-text>
-                          <h1 class="ion-no-margin">EUR</h1>
-                        </ion-text>
-                    </ion-col>
 
-                    <ion-col size="2" id="shuffleContainer">
-<!--                        <ion-icon name="repeat" size="large"></ion-icon>-->
-                        <ion-icon name="shuffle" size="large"></ion-icon>
-                    </ion-col>
-
-                    <ion-col size="5">
-                        <ion-item>
-                            <ion-label>To</ion-label>
-                            <ion-select ok-text="Okay"
-                                        cancel-text="Nah"
-                                        value="USD"
-                                        @ionChange="selectChange($event)">
-                                <ion-select-option v-for="(value, name, index) in currencies"
-                                                   :value="name">
-                                    {{name}}
-                                </ion-select-option>
-                            </ion-select>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+            <SelectCurrency v-if="!loadingRates"
+                            :currencies="currencies">
+            </SelectCurrency>
 
             <CardConvert v-if="latestConvert.isSet"
                          :latestConvert="latestConvert">
@@ -56,6 +31,7 @@
 
 <script>
     import CardConvert from '@/components/CardConvert.vue'
+    import SelectCurrency from '@/components/SelectCurrency.vue'
     import axios from 'axios'
 
     import {required} from 'vuelidate/lib/validators'
@@ -63,7 +39,8 @@
     export default {
         name: 'Home',
         components: {
-            CardConvert
+            CardConvert,
+            SelectCurrency
         },
         data() {
             return {
@@ -74,12 +51,12 @@
                 latestConvert: {
                     isSet: false,
                     from: {
-                      currency: 'EUR',
-                      value: ''
+                        currency: 'EUR',
+                        value: ''
                     },
                     to: {
-                      currency: '',
-                      value: ''
+                        currency: '',
+                        value: ''
                     }
                 }
             }
@@ -91,6 +68,9 @@
         },
         created() {
             this.getCurrencies()
+            this.$bus.$on('selectChange', event => {
+                this.selectChange(event)
+            })
         },
         methods: {
             getCurrencies() {
@@ -115,15 +95,15 @@
                     this.latestConvert.to.currency = this.toCurrency
                     this.latestConvert.to.value = (this.search * this.currencies[this.toCurrency]).toFixed(2)
                     this.latestConvert.isSet = true
-                  console.log(this.currencies[this.toCurrency])
+                    console.log(this.currencies[this.toCurrency])
                 } else {
                     // this.loading = false
                 }
             },
-          selectChange (e) {
-              this.toCurrency = e.detail.value
-              this.getSearchRest()
-          }
+            selectChange(e) {
+                this.toCurrency = e.detail.value
+                this.getSearchRest()
+            }
         },
     }
 </script>
@@ -140,9 +120,9 @@
         color: red;
     }
 
-  .flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 </style>
