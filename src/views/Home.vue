@@ -1,38 +1,160 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Currency Converter</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content padding>
-      <ion-list>
-        <ion-item>
-          <ion-checkbox slot="start"></ion-checkbox>
-          <ion-label>
-            <h1>Create Idea</h1>
-            <ion-note>Run Idea by Brandy</ion-note>
-          </ion-label>
-          <ion-badge color="success" slot="end">5 Days</ion-badge>
-        </ion-item>
-      </ion-list>
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button >
-          <ion-icon name="add" />
-        </ion-fab-button>
-      </ion-fab>
-    </ion-content>
-  </ion-page>
+    <ion-page>
+        <ion-header>
+            <ion-toolbar color="primary">
+                <ion-title>Currency Converter</ion-title>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content padding>
+            <ion-searchbar position="start"
+                           placeholder="Montant EUR..."
+                           v-bind:value="search"
+                           @input="search = $event.target.value"
+                           debounce="500"
+                           type="number"
+                           @ionChange="getSearchRest">
+            </ion-searchbar>
+            <div class="error" v-if="!$v.search.required">Field is required</div>
+            <!--      <div class="error" v-if="!$v.search.minLength">Name must have at least {{$v.search.$params.minLength.min}} letters.</div>-->
+
+            <ion-grid v-if="!loadingRates">
+                <ion-row>
+                    <ion-col size="5" class="flex-center">
+                        <ion-text>
+                          <h1 class="ion-no-margin">EUR</h1>
+                        </ion-text>
+                    </ion-col>
+
+                    <ion-col size="2" id="shuffleContainer">
+<!--                        <ion-icon name="repeat" size="large"></ion-icon>-->
+                        <ion-icon name="shuffle" size="large"></ion-icon>
+                    </ion-col>
+
+                    <ion-col size="5">
+                        <ion-item>
+                            <ion-label>To</ion-label>
+                            <ion-select ok-text="Okay"
+                                        cancel-text="Nah"
+                                        value="USD"
+                                        @ionChange="selectChange($event)">
+                                <ion-select-option v-for="(value, name, index) in currencies"
+                                                   :value="name">
+                                    {{name}}
+                                </ion-select-option>
+                            </ion-select>
+                        </ion-item>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+
+            <ion-card v-if="latestConvert.isSet">
+                <ion-card-content>
+                    <ion-text>
+                      <h3>{{latestConvert.from.value}} {{latestConvert.from.currency}}</h3>
+                      <h1>{{latestConvert.to.value}} {{latestConvert.to.currency}}</h1>
+                    </ion-text>
+                </ion-card-content>
+            </ion-card>
+
+
+            <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+                <ion-fab-button>
+                    <ion-icon name="add"/>
+                </ion-fab-button>
+            </ion-fab>
+        </ion-content>
+    </ion-page>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+    import HelloWorld from '@/components/HelloWorld.vue'
+    import axios from 'axios'
 
-export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  }
-}
+    import {required} from 'vuelidate/lib/validators'
+
+    export default {
+        name: 'Home',
+        components: {
+            HelloWorld
+        },
+        data() {
+            return {
+                search: '',
+                toCurrency: 'USD',
+                currencies: {},
+                loadingRates: true,
+                latestConvert: {
+                    isSet: false,
+                    from: {
+                      currency: 'EUR',
+                      value: ''
+                    },
+                    to: {
+                      currency: '',
+                      value: ''
+                    }
+                }
+            }
+        },
+        validations: {
+            search: {
+                required,
+            }
+        },
+        created() {
+            this.getCurrencies()
+        },
+        methods: {
+            getCurrencies() {
+                let nowUrl = `http://data.fixer.io/api/latest?access_key=${process.env.VUE_APP_FIXER_API_KEY}`
+                axios.get(nowUrl)
+                    .then(search => {
+                        console.log(search)
+                        if (search.data.success) {
+                            this.currencies = search.data.rates
+                        }
+                        this.loadingRates = false
+                    })
+                    .catch(error => {
+                        console.log(error)
+                        this.loadingRates = false
+                    });
+            },
+            getSearchRest() {
+                if (this.$v.search.required) {
+                    this.latestConvert.from.value = this.search
+
+                    this.latestConvert.to.currency = this.toCurrency
+                    this.latestConvert.to.value = (this.search * this.currencies[this.toCurrency]).toFixed(2)
+                    this.latestConvert.isSet = true
+                  console.log(this.currencies[this.toCurrency])
+                } else {
+                    // this.loading = false
+                }
+            },
+          selectChange (e) {
+              this.toCurrency = e.detail.value
+              this.getSearchRest()
+          }
+        },
+    }
 </script>
+
+<style lang="scss">
+    #shuffleContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .error {
+        color: red;
+    }
+
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

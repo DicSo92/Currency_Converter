@@ -13,7 +13,6 @@ export default new IonicVueRouter({
       name: 'home',
       component: Home
     },
-
   ]
 });
 
