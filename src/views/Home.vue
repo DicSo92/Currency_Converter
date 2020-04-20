@@ -15,7 +15,6 @@
                            @ionChange="getSearchRest">
             </ion-searchbar>
             <div class="error" v-if="!$v.search.required">Field is required</div>
-            <!--      <div class="error" v-if="!$v.search.minLength">Name must have at least {{$v.search.$params.minLength.min}} letters.</div>-->
 
             <ion-grid v-if="!loadingRates">
                 <ion-row>
@@ -47,27 +46,16 @@
                 </ion-row>
             </ion-grid>
 
-            <ion-card v-if="latestConvert.isSet">
-                <ion-card-content>
-                    <ion-text>
-                      <h3>{{latestConvert.from.value}} {{latestConvert.from.currency}}</h3>
-                      <h1>{{latestConvert.to.value}} {{latestConvert.to.currency}}</h1>
-                    </ion-text>
-                </ion-card-content>
-            </ion-card>
+            <CardConvert v-if="latestConvert.isSet"
+                         :latestConvert="latestConvert">
+            </CardConvert>
 
-
-            <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-                <ion-fab-button>
-                    <ion-icon name="add"/>
-                </ion-fab-button>
-            </ion-fab>
         </ion-content>
     </ion-page>
 </template>
 
 <script>
-    import HelloWorld from '@/components/HelloWorld.vue'
+    import CardConvert from '@/components/CardConvert.vue'
     import axios from 'axios'
 
     import {required} from 'vuelidate/lib/validators'
@@ -75,7 +63,7 @@
     export default {
         name: 'Home',
         components: {
-            HelloWorld
+            CardConvert
         },
         data() {
             return {
