@@ -10,7 +10,6 @@ Vue.config.productionTip = false
 Vue.use(Ionic)
 Vue.use(Vuelidate)
 
-
 let bus = new Vue
 Vue.prototype.$bus = bus
 
