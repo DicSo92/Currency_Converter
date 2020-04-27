@@ -44,6 +44,7 @@
                 this.$bus.$emit('selectChange', e)
             },
             revertConverter () {
+                this.$bus.$emit('revertConverter')
                 console.log(this.$refs.iconConvert)
                 if (this.$refs.iconConvert.style.transform === 'rotate(180deg)') {
                     this.$refs.iconConvert.style.transform = 'rotate(0deg)'

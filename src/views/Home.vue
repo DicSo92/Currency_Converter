@@ -7,7 +7,7 @@
         </ion-header>
         <ion-content padding>
             <ion-searchbar position="start"
-                           placeholder="Montant EUR..."
+                           :placeholder="`Montant ${revert ? toCurrency : 'EUR'}...`"
                            v-bind:value="search"
                            @input="search = $event.target.value"
                            debounce="500"
@@ -58,7 +58,8 @@
                         currency: '',
                         value: ''
                     }
-                }
+                },
+                revert: false
             }
         },
         validations: {
@@ -71,6 +72,15 @@
             this.$bus.$on('selectChange', event => {
                 this.selectChange(event)
             })
+            this.$bus.$on('revertConverter', () => {
+                this.revert = !this.revert
+                this.getSearchRest()
+            })
+        },
+        computed: {
+            prevSearch () {
+                return this.$store.state.prevSearch
+            }
         },
         methods: {
             getCurrencies() {
@@ -90,11 +100,19 @@
             },
             getSearchRest() {
                 if (this.$v.search.required) {
-                    this.latestConvert.from.value = this.search
-
-                    this.latestConvert.to.currency = this.toCurrency
-                    this.latestConvert.to.value = (this.search * this.currencies[this.toCurrency]).toFixed(2)
+                    if (this.revert) {
+                        this.latestConvert.from.currency = this.toCurrency
+                        this.latestConvert.from.value = this.search
+                        this.latestConvert.to.currency = 'EUR'
+                        this.latestConvert.to.value = (this.search / this.currencies[this.toCurrency]).toFixed(2)
+                    } else {
+                        this.latestConvert.from.currency = 'EUR'
+                        this.latestConvert.from.value = this.search
+                        this.latestConvert.to.currency = this.toCurrency
+                        this.latestConvert.to.value = (this.search * this.currencies[this.toCurrency]).toFixed(2)
+                    }
                     this.latestConvert.isSet = true
+
                     console.log(this.currencies[this.toCurrency])
                 } else {
                     // this.loading = false
